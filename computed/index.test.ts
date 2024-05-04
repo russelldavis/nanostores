@@ -565,3 +565,15 @@ test('stale computed via nested dependency', () => {
   $event.set("foo")
   deepStrictEqual(values, [12])
 })
+
+test('stale computed after dependencies change after unmount', () => {
+  let $atom = atom(1)
+  let $computed = computed($atom, value => value * 2)
+  let unsub = $computed.listen(() => {})
+  // Set before unsubscribing to clear $computed's dirty state
+  $atom.set(2)
+  unsub()
+  clock.tick(STORE_UNMOUNT_DELAY * 2)
+  $atom.set(3)
+  equal($computed.get(), 6)
+})

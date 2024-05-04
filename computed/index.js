@@ -1,4 +1,4 @@
-import { atom, epoch } from '../atom/index.js'
+import { atom } from '../atom/index.js'
 import { onMount } from '../lifecycle/index.js'
 
 let computedStore = (stores, cb, batched) => {
@@ -6,10 +6,11 @@ let computedStore = (stores, cb, batched) => {
 
   let previousArgs
   let currentRunId = 0
-  let currentEpoch
+  let isDirty = true
+
   let set = () => {
-    if (currentEpoch === epoch) return
-    currentEpoch = epoch
+    if (!isDirty) return
+    isDirty = false
     let args = stores.map($store => $store.get())
     if (
       previousArgs === undefined ||
@@ -44,8 +45,13 @@ let computedStore = (stores, cb, batched) => {
         timer = setTimeout(set)
       }
     : set
+  run.onDirty = () => {
+    isDirty = true
+    $computed.emitDirty()
+  }
 
   onMount($computed, () => {
+    isDirty = true
     let unbinds = stores.map($store => $store.listen(run))
     set()
     return () => {

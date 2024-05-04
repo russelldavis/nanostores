@@ -1,11 +1,15 @@
 import { clean } from '../clean-stores/index.js'
 
 let listenerQueue = []
-export let epoch = 0
 
 export let atom = (initialValue) => {
   let listeners = []
   let $atom = {
+    emitDirty() {
+      for (let listener of listeners) {
+        listener.onDirty?.()
+      }
+    },
     get() {
       if (!$atom.lc) {
         $atom.listen(() => {})()
@@ -25,9 +29,9 @@ export let atom = (initialValue) => {
       }
     },
     notify(oldValue, changedKey) {
-      epoch++
       let runListenerQueue = !listenerQueue.length
       for (let listener of listeners) {
+        listener.onDirty?.()
         listenerQueue.push(
           listener,
           $atom.value,
