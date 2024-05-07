@@ -124,7 +124,7 @@ test('supports complicated case of last unsubscribing', () => {
   deepStrictEqual(events, ['destroy'])
 })
 
-test('supports the same listeners', () => {
+test('same listener is only called once', () => {
   let events: (string | undefined)[] = []
   function listener(value: string | undefined): void {
     events.push(value)
@@ -138,19 +138,15 @@ test('supports the same listeners', () => {
     }
   })
 
-  let unbind1 = $store.listen(listener)
-  let unbind2 = $store.listen(listener)
+  let unbind = $store.listen(listener)
+  $store.listen(listener)
   $store.set('1')
-  deepStrictEqual(events, ['1', '1'])
+  deepStrictEqual(events, ['1'])
 
-  unbind1()
+  unbind()
   clock.runAll()
   $store.set('2')
-  deepStrictEqual(events, ['1', '1', '2'])
-
-  unbind2()
-  clock.runAll()
-  deepStrictEqual(events, ['1', '1', '2', 'destroy'])
+  deepStrictEqual(events, ['1', 'destroy'])
 })
 
 test('supports double unsubscribe', () => {
