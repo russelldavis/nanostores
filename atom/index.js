@@ -39,7 +39,15 @@ export let atom = (initialValue) => {
       return $atom.value
     },
     lc: 0,
-    listen(listener) {
+    listen(_listener) {
+      let lastVal
+      let hasRun = false
+      let listener = (value, oldValue, changedKey) => {
+        if (hasRun && value === lastVal) return
+        hasRun = true
+        lastVal = value
+        _listener(value, oldValue, changedKey)
+      }
       $atom.lc = listeners.push(listener)
 
       return () => {
