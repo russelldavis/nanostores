@@ -2,7 +2,7 @@ import { clean } from '../clean-stores/index.js'
 
 let listenerQueue = []
 let lqIndex = 0
-const QUEUE_ITEMS_PER_LISTENER = 4
+const QUEUE_ITEMS_PER_LISTENER = 3
 export let epoch = 0
 let batchLevel = 0
 
@@ -20,11 +20,7 @@ export let batch = (cb) => {
 
 let runListenerQueue = () => {
   for (lqIndex = 0; lqIndex < listenerQueue.length; lqIndex += QUEUE_ITEMS_PER_LISTENER) {
-    listenerQueue[lqIndex](
-      listenerQueue[lqIndex + 1],
-      listenerQueue[lqIndex + 2],
-      listenerQueue[lqIndex + 3]
-    )
+    listenerQueue[lqIndex]._notify(listenerQueue[lqIndex + 1], listenerQueue[lqIndex + 2])
   }
   listenerQueue.length = 0
 }
@@ -32,6 +28,12 @@ let runListenerQueue = () => {
 export let atom = (initialValue) => {
   let listeners = []
   let $atom = {
+    _notify(oldValue, changedKey) {
+      // Iterates over a copy so we don't get messed up by mutations during iteration
+      for (let listener of listeners) {
+        listener($atom.get(), oldValue, changedKey)
+      }
+    },
     get() {
       if (!$atom.lc) {
         $atom.listen(() => {})()
@@ -61,14 +63,11 @@ export let atom = (initialValue) => {
     notify(oldValue, changedKey) {
       epoch++
       let queueWasEmpty = !listenerQueue.length
-      for (let listener of listeners) {
-        listenerQueue.push(
-          listener,
-          $atom.value,
-          oldValue,
-          changedKey
-        )
-      }
+      listenerQueue.push(
+        $atom,
+        oldValue,
+        changedKey
+      )
       if (!batchLevel && queueWasEmpty) runListenerQueue()
     },
     /* It will be called on last listener unsubscribing.
