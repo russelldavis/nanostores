@@ -68,6 +68,12 @@ export let atom = (initialValue) => {
     },
     notify(oldValue, changedKey) {
       epoch++
+      if (!batchLevel) {
+        for (let listener of listeners) {
+          listener($atom.value, oldValue, changedKey)
+        }
+        return
+      }
       let queueWasEmpty = !listenerQueue.length
       for (let listener of listeners) {
         listenerQueue.push(
@@ -77,7 +83,7 @@ export let atom = (initialValue) => {
           changedKey
         )
       }
-      if (!batchLevel && queueWasEmpty) runListenerQueue()
+      // if (!batchLevel && queueWasEmpty) runListenerQueue()
     },
     /* It will be called on last listener unsubscribing.
        We will redefine it in onMount and onStop. */
