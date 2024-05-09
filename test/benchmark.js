@@ -13,71 +13,71 @@ function formatNumber(number) {
 }
 
 suite
-  .add('simple', () => {
-    let $counter = atom(0)
-    let calls = 0
+  // .add('simple', () => {
+  //   let $counter = atom(0)
+  //   let calls = 0
 
-    function increase() {
-      $counter.set($counter.get() + 1)
-    }
-    increase()
+  //   function increase() {
+  //     $counter.set($counter.get() + 1)
+  //   }
+  //   increase()
 
-    let unbind1 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
-    let unbind2 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
-    unbind1()
-    let unbind3 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
+  //   let unbind1 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
+  //   let unbind2 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
+  //   unbind1()
+  //   let unbind3 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
 
-    increase()
-    increase()
-    increase()
+  //   increase()
+  //   increase()
+  //   increase()
 
-    unbind2()
-    unbind3()
-  })
-  .add('hooks', () => {
-    let $counter = atom(0)
-    let calls = 0
+  //   unbind2()
+  //   unbind3()
+  // })
+  // .add('hooks', () => {
+  //   let $counter = atom(0)
+  //   let calls = 0
 
-    onMount($counter, () => {
-      if (!calls) calls += 1
-      return () => {
-        if (!calls) calls += 1
-      }
-    })
+  //   onMount($counter, () => {
+  //     if (!calls) calls += 1
+  //     return () => {
+  //       if (!calls) calls += 1
+  //     }
+  //   })
 
-    onSet($counter, () => {
-      if (!calls) calls += 1
-    })
+  //   onSet($counter, () => {
+  //     if (!calls) calls += 1
+  //   })
 
-    function increase() {
-      $counter.set($counter.get() + 1)
-    }
-    increase()
+  //   function increase() {
+  //     $counter.set($counter.get() + 1)
+  //   }
+  //   increase()
 
-    let unbind1 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
-    let unbind2 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
-    unbind1()
-    let unbind3 = $counter.listen(() => {
-      if (!calls) calls += 1
-    })
+  //   let unbind1 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
+  //   let unbind2 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
+  //   unbind1()
+  //   let unbind3 = $counter.listen(() => {
+  //     if (!calls) calls += 1
+  //   })
 
-    increase()
-    increase()
-    increase()
+  //   increase()
+  //   increase()
+  //   increase()
 
-    unbind2()
-    unbind3()
-  })
+  //   unbind2()
+  //   unbind3()
+  // })
   .add('computed', () => {
     let $entry = atom(0)
     let $a = computed($entry, entry => entry)

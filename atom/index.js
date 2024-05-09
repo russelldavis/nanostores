@@ -53,7 +53,7 @@ export let atom = (initialValue) => {
     notify(oldValue, changedKey) {
       epoch++
       if (!batchLevel) {
-        batch(() => $atom._notify(oldValue, changedKey))
+        $atom._notify(oldValue, changedKey)
         return
       }
       let atomChanges = batchQueue.get($atom)
