@@ -16,7 +16,7 @@ export let batch = (cb) => {
       batchQueue = new Map()
       batchChangedKeys = new Map()
       batch(() => {
-        // Not destructuring queueEntry or changeEntry gives better perf
+        // Iterating over keys instead of entries has better perf
         for (let $atom of oldQueue.keys()) {
           $atom._notify(oldQueue.get($atom), oldBatchChangedKeys.get($atom))
         }
@@ -30,9 +30,8 @@ export let atom = (initialValue) => {
   let $atom = {
     _notify(oldValue, changedKey) {
       // Iterates over a copy so we don't get messed up by mutations during iteration
-      for (let listener of listeners) {
-        // if (listeners.has(listener))
-        listener($atom.get(), oldValue, changedKey)
+      for (let listener of [...listeners]) {
+        if (listeners.has(listener)) listener($atom.get(), oldValue, changedKey)
       }
     },
     get() {

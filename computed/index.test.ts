@@ -14,6 +14,7 @@ import {
   type StoreValue,
   task
 } from '../index.js'
+import {batch} from '../atom/index.js'
 
 let clock = FakeTimers.install()
 
@@ -585,4 +586,65 @@ test('stale computed via nested dependency', () => {
   })
   $event.set("foo")
   deepStrictEqual(values, [12])
+})
+
+// test('stale computed value passed to listener via setting own dependency', () => {
+//   let $event = atom()
+//   let $atom1 = atom(1)
+//   let $atom2 = atom(2)
+//   let $computed1 = computed([$atom1, $atom2], (val1, val2) => val1 + val2)
+//   let $computed2 = computed($computed1, value => value * 3)
+//   $computed2.listen(() => {})
+//   let values: (number | string)[] = []
+//   $event.listen(() => {
+//     $atom.set(2)
+//     values.push($computed2.get())
+//   })
+//   $event.set("foo")
+//   deepStrictEqual(values, [12])
+// })
+
+test('stale computed value passed to listener via dependency change in earlier listener from same batch', () => {
+  let values: number[] = []
+  let $atom = atom(1)
+  let $event1 = atom()
+  let $event2 = atom()
+  $event1.listen(() => {
+    $event2.set("foo")
+  })
+  $event2.listen(() => {
+    $atom.set(3)
+  })
+  let $computed = computed($atom, value => value * 2)
+  $computed.listen((val) => {
+    values.push(val)
+  })
+  batch(() => {
+    $event1.set("foo")
+    $atom.set(2)
+  })
+  deepStrictEqual(values, [6])
+})
+
+test('no double callback when calling get() on a stale computed in same batch as computed listener', () => {
+  let values: number[] = []
+  let $atom = atom(1)
+  let $event1 = atom()
+  let $event2 = atom()
+  $event1.listen(() => {
+    $event2.set("foo")
+  })
+  $event2.listen(() => {
+    $atom.set(3)
+    $computed.get()
+  })
+  let $computed = computed($atom, value => value * 2)
+  $computed.listen((val) => {
+    values.push(val)
+  })
+  batch(() => {
+    $event1.set("foo")
+    $atom.set(2)
+  })
+  deepStrictEqual(values, [6])
 })
